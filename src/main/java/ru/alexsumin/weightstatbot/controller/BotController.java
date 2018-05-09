@@ -32,16 +32,16 @@ import java.util.stream.Collectors;
 @Component
 public class BotController extends TelegramLongPollingBot {
 
-    public static final String HELLO = "What can this bot do?" +
-            "This simple bot allows you to track" +
-            "your weight's change, draw a chart with of your results." +
-            "Just write /help to see a help." +
+    public static final String HELLO = "What can this bot do? " +
+            "This simple bot allows you to track " +
+            "your weight change, draw a chart with of your results. " +
+            "Just write /help to see a hint. " +
             "Other functionality will be soon! Have a nice day :)";
 
-    public static final String HELP = "Now I'm going to tell you how to use me" +
+    public static final String HELP = "Now I'm going to tell you how to use me. " +
             "I keep your statistics of weight changes. " +
             "To add a new value, simply send a number. " +
-            "To get a chart, send me  /chart. " +
+            "To get a chart, send me /chart. " +
             "To get statistics, send me /stat." +
             "To delete a last value, send me /delete.";
 
