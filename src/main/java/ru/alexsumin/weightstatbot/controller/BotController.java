@@ -219,23 +219,11 @@ public class BotController extends TelegramLongPollingBot {
             } else {
 
                 BigDecimal firstMeasurement = measurementRepository.findById(first.get().longValue()).get().getAmount();
-                List<Measurement> list = account.getMeasurements();
+                List<Measurement> measurements = account.getMeasurements();
 
-                List<Measurement> tenDaysAgoList = list.stream().
-                        filter(m -> m.getDateOfMeasurement().getTime() <= (new Date(System.currentTimeMillis()).getTime() - 10 * 24 * 60 * 60 * 1000)).
-                        collect(Collectors.toList());
+                BigDecimal tenDaysAgo = getFirstMeasurementInPeriod(measurements, TEN_DAYS);
+                BigDecimal thirtyDaysAgo = getFirstMeasurementInPeriod(measurements, THIRTY_DAYS);
 
-                BigDecimal tenDaysAgo = null;
-                if (tenDaysAgoList.size() != 0)
-                    tenDaysAgo = tenDaysAgoList.get(0).getAmount();
-
-                List<Measurement> thirtyDaysAgoList = list.stream().
-                        filter(m -> m.getDateOfMeasurement().getTime() <= (new Date(System.currentTimeMillis()).getTime() - 30 * 24 * 60 * 60 * 1000)).
-                        collect(Collectors.toList());
-
-                BigDecimal thirtyDaysAgo = null;
-                if (thirtyDaysAgoList.size() != 0)
-                    thirtyDaysAgo = tenDaysAgoList.get(0).getAmount();
 
                 BigDecimal last = measurementRepository.findById
                         (measurementRepository.getUsersLastMeasurementId(chatId).get()
@@ -258,6 +246,16 @@ public class BotController extends TelegramLongPollingBot {
             e.printStackTrace();
         }
 
+    }
+
+    private BigDecimal getFirstMeasurementInPeriod(List<Measurement> list, long period) {
+        List<Measurement> tenDaysAgoList = list.stream().
+                filter(m -> m.getDateOfMeasurement().getTime() <= (new Date(System.currentTimeMillis()).getTime() - period)).
+                collect(Collectors.toList());
+        BigDecimal value = null;
+        if (tenDaysAgoList.size() != 0)
+            value = tenDaysAgoList.get(0).getAmount();
+        return value;
     }
 
 
