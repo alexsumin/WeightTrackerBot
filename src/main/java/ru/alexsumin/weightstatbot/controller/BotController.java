@@ -32,24 +32,24 @@ import java.util.stream.Collectors;
 @Component
 public class BotController extends TelegramLongPollingBot {
 
-    public static final String HELLO = "What can this bot do? " +
+    private static final String HELLO = "What can this bot do? " +
             "This simple bot allows you to track " +
             "your weight change, draw a chart with of your results. " +
             "Just write /help to see a hint. " +
             "Other functionality will be soon! Have a nice day :)";
 
-    public static final String HELP = "Now I'm going to tell you how to use me. " +
+    private static final String HELP = "Now I'm going to tell you how to use me. " +
             "I keep your statistics of weight changes. " +
             "To add a new value, simply send a number. " +
             "To get a chart, send me /chart. " +
             "To get statistics, send me /stat." +
             "To delete a last value, send me /delete.";
 
-    public static final String DELETED = "Successfully deleted last measurement!";
+    private static final String DELETED = "Successfully deleted last measurement!";
 
-    public static final String NO_VALUES = "Ooups! No one measurement found. Just add a new to start!";
+    private static final String NO_VALUES = "Ooups! No one measurement found. Just add a new to start!";
 
-    public static final String UNKNOWN = "Ooups! I'm sorry, But I'm not smart guy and I don't understand you. " +
+    private static final String UNKNOWN = "Ooups! I'm sorry, But I'm not smart guy and I don't understand you. " +
             "I can recognize only a few commands. Send /help to see a them.";
 
 
@@ -191,7 +191,7 @@ public class BotController extends TelegramLongPollingBot {
         accountRepository.save(newUser);
     }
 
-    public void sendHelloMessage(Long chatId) {
+    private void sendHelloMessage(Long chatId) {
         SendMessage greetingMessage = new SendMessage();
         greetingMessage.setChatId(chatId);
         greetingMessage.setText(HELLO);
@@ -203,7 +203,7 @@ public class BotController extends TelegramLongPollingBot {
 
     }
 
-    public boolean isUserExist(Long chatId) {
+    private boolean isUserExist(Long chatId) {
         Optional<Account> user = accountRepository.findByChatId(chatId);
         return (user.isPresent());
     }
