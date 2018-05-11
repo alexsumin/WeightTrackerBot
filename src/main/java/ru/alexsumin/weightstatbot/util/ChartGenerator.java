@@ -32,7 +32,6 @@ public class ChartGenerator extends Application {
 
     public static void initialize(ThreadPoolTaskExecutor taskExecutor) {
         taskExecutor.execute(new Runnable() {
-
             @Override
             public void run() {
                 launch(ChartGenerator.class);
@@ -92,14 +91,14 @@ public class ChartGenerator extends Application {
 
 
                     result = true;
-                } catch (Exception e) {
 
-                    e.printStackTrace();
+
+                } catch (Exception e) {
+                    throw new ChartGenerationException(e);
                 }
             }
         });
         while (result == false) {
-
             // wait?
         }
         result = false;

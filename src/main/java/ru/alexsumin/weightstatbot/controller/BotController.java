@@ -87,12 +87,14 @@ public class BotController extends TelegramLongPollingBot {
             Message message = update.getMessage();
             Long chatId = message.getChatId();
 
-            if (!isUserExist(chatId)) {
+            if (!isUserExists(chatId)) {
                 registerUser(chatId);
+                logger.info("Register an user with chatId: " + chatId);
                 sendHelloMessage(chatId);
                 return;
             } else {
                 String text = message.getText();
+                logger.info("Received text: \"" + text + "\" from user.chatId: " + chatId);
                 UserAnswer answer = UserChoiceParser.getUserAnswer(text);
 
                 switch (answer) {
@@ -126,7 +128,7 @@ public class BotController extends TelegramLongPollingBot {
         try {
             execute(response);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
     }
 
@@ -146,7 +148,7 @@ public class BotController extends TelegramLongPollingBot {
 
             execute(response);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
     }
 
@@ -170,8 +172,11 @@ public class BotController extends TelegramLongPollingBot {
             photoMessage.setNewPhoto(file);
             sendPhoto(photoMessage);
 
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+        } catch (ChartGenerator.ChartGenerationException c) {
+            logger.error("Couldn't generate a chart and  send to user.chatId " + chatId + ". " + c.getMessage());
+        } catch
+                (TelegramApiException e) {
+            logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
     }
 
@@ -182,7 +187,7 @@ public class BotController extends TelegramLongPollingBot {
         try {
             execute(response);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
     }
 
@@ -198,12 +203,12 @@ public class BotController extends TelegramLongPollingBot {
         try {
             execute(greetingMessage);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
 
     }
 
-    private boolean isUserExist(Long chatId) {
+    private boolean isUserExists(Long chatId) {
         Optional<Account> user = accountRepository.findByChatId(chatId);
         return (user.isPresent());
     }
@@ -243,7 +248,7 @@ public class BotController extends TelegramLongPollingBot {
 
 
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
 
     }
@@ -280,7 +285,7 @@ public class BotController extends TelegramLongPollingBot {
         try {
             execute(message);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
 
     }

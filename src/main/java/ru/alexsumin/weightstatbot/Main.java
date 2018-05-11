@@ -1,5 +1,7 @@
 package ru.alexsumin.weightstatbot;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -12,11 +14,15 @@ import java.nio.file.Paths;
 
 @SpringBootApplication
 public class Main {
+
     public final static String PICTURE_FOLDER = "./pics";
+
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
         Main main = new Main();
         main.createDirectoryForGeneratedImages();
+
 
         SpringApplication.run(Main.class, args);
     }
@@ -42,7 +48,7 @@ public class Main {
             try {
                 Files.createDirectories(path);
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Couldn't create picture folder: " + e.getMessage());
             }
         }
     }
