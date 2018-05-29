@@ -7,23 +7,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 @SpringBootApplication
 public class Main {
-
-    public final static String PICTURE_FOLDER = "./pics";
 
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        Main main = new Main();
-        main.createDirectoryForGeneratedImages();
-
-
         SpringApplication.run(Main.class, args);
     }
 
@@ -41,15 +30,4 @@ public class Main {
         return executor;
     }
 
-
-    private void createDirectoryForGeneratedImages() {
-        Path path = Paths.get(PICTURE_FOLDER);
-        if (Files.notExists(path)) {
-            try {
-                Files.createDirectories(path);
-            } catch (IOException e) {
-                logger.error("Couldn't create picture folder: " + e.getMessage());
-            }
-        }
-    }
 }

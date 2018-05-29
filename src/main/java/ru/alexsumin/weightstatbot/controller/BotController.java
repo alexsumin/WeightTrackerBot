@@ -21,7 +21,8 @@ import ru.alexsumin.weightstatbot.util.ChartGenerator;
 import ru.alexsumin.weightstatbot.util.UserChoiceParser;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Date;
@@ -166,16 +167,16 @@ public class BotController extends TelegramLongPollingBot {
                 noOneValueFound(chatId);
                 return;
             }
-            File file = ChartGenerator.generateChart(list, chatId);
+            byte[] file = ChartGenerator.generateChart(list);
+            InputStream bis = new ByteArrayInputStream(file);
 
             SendPhoto photoMessage = new SendPhoto().setChatId(chatId);
-            photoMessage.setNewPhoto(file);
+            photoMessage.setNewPhoto("stat.png", bis);
             sendPhoto(photoMessage);
 
         } catch (ChartGenerator.ChartGenerationException c) {
             logger.error("Couldn't generate a chart and  send to user.chatId " + chatId + ". " + c.getMessage());
-        } catch
-                (TelegramApiException e) {
+        } catch (TelegramApiException e) {
             logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
     }
