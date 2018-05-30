@@ -13,9 +13,7 @@ public class UserChoiceParser {
 
     public static synchronized UserAnswer getUserAnswer(String text) {
 
-        text.toLowerCase();
-
-        switch (text) {
+        switch (text.toLowerCase()) {
 
             case ("/start"):
                 return UserAnswer.START;

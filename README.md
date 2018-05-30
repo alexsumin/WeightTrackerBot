@@ -1,1 +1,1 @@
-# WeightTrackerBot
+# Weight Tracker Telegram Bot
