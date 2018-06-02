@@ -7,14 +7,14 @@ import java.math.BigDecimal;
 
 public class UserChoiceParser {
 
-    private UserChoiceParser() {
+    private String text;
+
+    public UserChoiceParser(String text) {
+        this.text = text.toLowerCase();
     }
 
-
-    public static synchronized UserAnswer getUserAnswer(String text) {
-
-        switch (text.toLowerCase()) {
-
+    public UserAnswer getUserAnswer() {
+        switch (text) {
             case ("/start"):
                 return UserAnswer.START;
             case ("/help"):

@@ -1,4 +1,4 @@
-package ru.alexsumin.weightstatbot.util;
+package ru.alexsumin.weightstatbot.chart;
 
 
 import javafx.collections.ObservableList;

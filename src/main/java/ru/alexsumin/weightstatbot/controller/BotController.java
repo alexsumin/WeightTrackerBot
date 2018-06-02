@@ -12,23 +12,23 @@ import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
+import ru.alexsumin.weightstatbot.chart.ChartGenerator;
 import ru.alexsumin.weightstatbot.model.Account;
 import ru.alexsumin.weightstatbot.model.Measurement;
 import ru.alexsumin.weightstatbot.model.UserAnswer;
-import ru.alexsumin.weightstatbot.repository.AccountRepository;
-import ru.alexsumin.weightstatbot.repository.MeasurementRepository;
-import ru.alexsumin.weightstatbot.util.ChartGenerator;
+import ru.alexsumin.weightstatbot.service.AccountService;
+import ru.alexsumin.weightstatbot.service.MeasurementService;
+import ru.alexsumin.weightstatbot.util.DifferenceCalculator;
 import ru.alexsumin.weightstatbot.util.UserChoiceParser;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Component
 public class BotController extends TelegramLongPollingBot {
@@ -53,15 +53,16 @@ public class BotController extends TelegramLongPollingBot {
     private static final String UNKNOWN = "Ooups! I'm sorry, But I'm not smart guy and I don't understand you. " +
             "I can recognize only a few commands. Send /help to see a them.";
 
+    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM");
 
-    private static final long TEN_DAYS = 10 * 24 * 60 * 60 * 1000;
-    private static final long THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+    private static final int TEN_DAYS = 10;
+    private static final int THIRTY_DAYS = 30;
 
     private static final Logger logger = LoggerFactory.getLogger(BotController.class);
 
     private final ThreadPoolTaskExecutor taskExecutor;
-    private AccountRepository accountRepository;
-    private MeasurementRepository measurementRepository;
+    private AccountService accountService;
+    private MeasurementService measurementService;
 
     @Value("${bot.token}")
     private String token;
@@ -69,11 +70,10 @@ public class BotController extends TelegramLongPollingBot {
     private String username;
 
     @Autowired
-    public BotController(AccountRepository accountRepository, MeasurementRepository measurementRepository, ThreadPoolTaskExecutor taskExecutor) {
-        this.accountRepository = accountRepository;
-        this.measurementRepository = measurementRepository;
+    public BotController(AccountService accountService, MeasurementService measurementService, ThreadPoolTaskExecutor taskExecutor) {
+        this.accountService = accountService;
+        this.measurementService = measurementService;
         this.taskExecutor = taskExecutor;
-
     }
 
     @PostConstruct
@@ -85,18 +85,17 @@ public class BotController extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage()) {
+
             Message message = update.getMessage();
             Long chatId = message.getChatId();
 
-            if (!isUserExists(chatId)) {
-                registerUser(chatId);
-                logger.info("Register an user with chatId: " + chatId);
+            if (!accountService.isUserExists(chatId))
                 sendHelloMessage(chatId);
-                return;
-            } else {
+
+            else {
                 String text = message.getText();
                 logger.info("Received text: \"" + text + "\" from user.chatId: " + chatId);
-                UserAnswer answer = UserChoiceParser.getUserAnswer(text);
+                UserAnswer answer = new UserChoiceParser(text).getUserAnswer();
 
                 switch (answer) {
                     case GET_HELP:
@@ -134,19 +133,14 @@ public class BotController extends TelegramLongPollingBot {
     }
 
     private void deleteLastValue(Long chatId) {
-        Optional<BigInteger> measurement = measurementRepository.getUsersLastMeasurementId(chatId);
         try {
-            if (!measurement.isPresent()) {
+            if (!measurementService.deleteLastMeasurement(chatId)) {
                 noOneValueFound(chatId);
                 return;
             }
-            Long lastMeasurement = measurement.get().longValue();
-            measurementRepository.deleteById(lastMeasurement);
-
             SendMessage response = new SendMessage();
             response.setChatId(chatId);
             response.setText(DELETED);
-
             execute(response);
         } catch (TelegramApiException e) {
             logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
@@ -161,7 +155,7 @@ public class BotController extends TelegramLongPollingBot {
     }
 
     private void sendChart(Long chatId) {
-        List<Measurement> list = accountRepository.findByChatId(chatId).get().getMeasurements();
+        List<Measurement> list = accountService.findByChatId(chatId).getMeasurements();
         try {
             if (list.size() == 0) {
                 noOneValueFound(chatId);
@@ -175,7 +169,7 @@ public class BotController extends TelegramLongPollingBot {
             sendPhoto(photoMessage);
 
         } catch (ChartGenerator.ChartGenerationException c) {
-            logger.error("Couldn't generate a chart and  send to user.chatId " + chatId + ". " + c.getMessage());
+            logger.error("Couldn't generate a chart and send to user.chatId " + chatId + ". " + c.getMessage());
         } catch (TelegramApiException e) {
             logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
@@ -192,10 +186,6 @@ public class BotController extends TelegramLongPollingBot {
         }
     }
 
-    private void registerUser(Long chatId) {
-        Account newUser = new Account(chatId);
-        accountRepository.save(newUser);
-    }
 
     private void sendHelloMessage(Long chatId) {
         SendMessage greetingMessage = new SendMessage();
@@ -209,109 +199,72 @@ public class BotController extends TelegramLongPollingBot {
 
     }
 
-    private boolean isUserExists(Long chatId) {
-        Optional<Account> user = accountRepository.findByChatId(chatId);
-        return (user.isPresent());
-    }
-
     private void sendStat(Long chatId) {
 
-        Account account = accountRepository.findByChatId(chatId).get();
-        Optional<BigInteger> first = measurementRepository.getUsersFirstMeasurementId(chatId);
+        Optional<BigDecimal> first = measurementService.getUsersFirstMeasurementValue(chatId);
 
         try {
             if (!first.isPresent()) {
                 noOneValueFound(chatId);
             } else {
 
-                BigDecimal firstMeasurement = measurementRepository.findById(first.get().longValue()).get().getAmount();
-                List<Measurement> measurements = account.getMeasurements();
 
-                BigDecimal tenDaysAgo = getFirstMeasurementInPeriod(measurements, TEN_DAYS);
-                BigDecimal thirtyDaysAgo = getFirstMeasurementInPeriod(measurements, THIRTY_DAYS);
+                Optional<BigDecimal> tenDaysAgo = measurementService.getFirstMeasurementValueInPeriod(chatId, TEN_DAYS);
+                Optional<BigDecimal> thirtyDaysAgo = measurementService.getFirstMeasurementValueInPeriod(chatId, THIRTY_DAYS);
 
+                BigDecimal last = measurementService.getUsersLastMeasurementValue(chatId).get();
 
-                BigDecimal last = measurementRepository.findById
-                        (measurementRepository.getUsersLastMeasurementId(chatId).get()
-                                .longValue()).get().getAmount();
 
                 SendMessage message = new SendMessage();
                 message.setChatId(chatId);
+
                 message.setText("Your current weight: " + last + " kg.\n" +
                         "Your progress in" +
-                        "\n10 days: " + getDifferenceWithSignForStat(tenDaysAgo, last) +
-                        "\n30 days: " + getDifferenceWithSignForStat(thirtyDaysAgo, last) +
-                        "\nTotal: " + getDifferenceWithSignForStat(firstMeasurement, last)
+                        "\n10 days: " + DifferenceCalculator.getDifferenceWithSignForStat(tenDaysAgo, last) +
+                        "\n30 days: " + DifferenceCalculator.getDifferenceWithSignForStat(thirtyDaysAgo, last) +
+                        "\nTotal: " + DifferenceCalculator.getDifferenceWithSignForStat(first, last)
                         + "\nTo see chart just send me /chart");
 
                 execute(message);
             }
-
-
         } catch (TelegramApiException e) {
             logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
 
     }
 
-    private BigDecimal getFirstMeasurementInPeriod(List<Measurement> list, long period) {
-        List<Measurement> tenDaysAgoList = list.stream().
-                filter(m -> m.getDateOfMeasurement().getTime() <= (new Date(System.currentTimeMillis()).getTime() - period)).
-                collect(Collectors.toList());
-        BigDecimal value = null;
-        if (tenDaysAgoList.size() != 0)
-            value = tenDaysAgoList.get(0).getAmount();
-        return value;
-    }
-
 
     private void addNewValue(Long chatId, String text) {
         //it's safe, first i checked user for existing
-        Account account = accountRepository.findByChatId(chatId).get();
+        Account account = accountService.findByChatId(chatId);
 
         text = text.replace(',', '.');
         BigDecimal numeric = new BigDecimal(text);
 
-        Optional<BigInteger> last = measurementRepository.getUsersLastMeasurementId(chatId);
+        Optional<BigDecimal> measurementLast = measurementService.getUsersLastMeasurementValue(chatId);
 
-        Measurement measurement = new Measurement(numeric, account);
-        measurementRepository.save(measurement);
+        Measurement measurementNew = new Measurement(numeric, account);
+        measurementService.addNewValue(measurementNew);
 
         SendMessage message = new SendMessage();
         message.setChatId(chatId);
+
         message.setText("Well, The new measurement " + text + " kg was added on " +
-                new Date(System.currentTimeMillis()) + "." +
-                getDifferenceWithSign(last, numeric));
+                getCurrentDate() + "." +
+                DifferenceCalculator.getDifferenceWithSign(measurementLast, numeric)
+        );
 
         try {
             execute(message);
         } catch (TelegramApiException e) {
             logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
         }
-
     }
 
-    private String getDifferenceWithSignForStat(BigDecimal first, BigDecimal second) {
-        if (first == null) return "0 kg";
-        BigDecimal result = first.subtract(second);
 
-        if (result.doubleValue() < 0)
-            return result + " kg";
-        else return "-" + result + " kg";
+    private String getCurrentDate() {
+        return formatter.format(new Date(System.currentTimeMillis()));
     }
-
-    private String getDifferenceWithSign(Optional<BigInteger> forCheck, BigDecimal secondValue) {
-
-        if (!forCheck.isPresent()) return "";
-
-        BigDecimal firstValue = measurementRepository.findById(forCheck.get().longValue()).get().getAmount();
-        BigDecimal result = secondValue.subtract(firstValue);
-
-        if (result.doubleValue() < 0)
-            return " Last change: " + result + " kg.";
-        else return " Last change: +" + result + " kg.";
-    }
-
 
     @Override
     public String getBotUsername() {

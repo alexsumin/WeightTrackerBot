@@ -1,4 +1,4 @@
-package ru.alexsumin.weightstatbot.util;
+package ru.alexsumin.weightstatbot.chart;
 
 import javafx.scene.chart.AreaChart;
 import ru.alexsumin.weightstatbot.model.Measurement;

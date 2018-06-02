@@ -1,4 +1,4 @@
-package ru.alexsumin.weightstatbot.util;
+package ru.alexsumin.weightstatbot.chart;
 
 import javafx.application.Application;
 import javafx.application.Platform;

@@ -8,28 +8,28 @@ public class UserChoiceParserTest {
     @Test
     public void parseCommandTest() {
 
-        UserAnswer answerStart = UserChoiceParser.getUserAnswer("/start");
+        UserAnswer answerStart = new UserChoiceParser("/start").getUserAnswer();
         Assert.assertEquals(UserAnswer.START, answerStart);
 
-        UserAnswer answerChart = UserChoiceParser.getUserAnswer("/chart");
+        UserAnswer answerChart = new UserChoiceParser("/chart").getUserAnswer();
         Assert.assertEquals(UserAnswer.GET_CHART, answerChart);
 
-        UserAnswer answerAddValue = UserChoiceParser.getUserAnswer("12.3");
+        UserAnswer answerAddValue = new UserChoiceParser("12.5").getUserAnswer();
         Assert.assertEquals(UserAnswer.ADD_VALUE, answerAddValue);
 
-        UserAnswer answerHelp = UserChoiceParser.getUserAnswer("/hElP");
+        UserAnswer answerHelp = new UserChoiceParser("/hElP").getUserAnswer();
         Assert.assertEquals(UserAnswer.GET_HELP, answerHelp);
 
-        UserAnswer answerStat = UserChoiceParser.getUserAnswer("/sTAT");
+        UserAnswer answerStat = new UserChoiceParser("/sTAT").getUserAnswer();
         Assert.assertEquals(UserAnswer.GET_STAT, answerStat);
 
-        UserAnswer answerDelete = UserChoiceParser.getUserAnswer("/dElEtE");
+        UserAnswer answerDelete = new UserChoiceParser("/dElEtE").getUserAnswer();
         Assert.assertEquals(UserAnswer.DELETE, answerDelete);
 
-        UserAnswer answerUnknown = UserChoiceParser.getUserAnswer("/unknown_text");
+        UserAnswer answerUnknown = new UserChoiceParser("/unknown_text").getUserAnswer();
         Assert.assertEquals(UserAnswer.UNKNOWN, answerUnknown);
 
-        UserAnswer answerAddValueAnother = UserChoiceParser.getUserAnswer("99,99");
+        UserAnswer answerAddValueAnother = new UserChoiceParser("99,99").getUserAnswer();
         Assert.assertEquals(UserAnswer.ADD_VALUE, answerAddValueAnother);
 
     }

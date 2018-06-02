@@ -136,4 +136,5 @@ public class MeasurementRepositoryTest {
         measurementRepository.deleteById(idToDelete);
         assertEquals(idToDelete, measurementRepository.findById(idToDelete).get().getId());
     }
+
 }

@@ -2,6 +2,7 @@ package ru.alexsumin.weightstatbot.util;
 
 import org.junit.Before;
 import org.junit.Test;
+import ru.alexsumin.weightstatbot.chart.ChartHelperUtil;
 import ru.alexsumin.weightstatbot.model.Account;
 import ru.alexsumin.weightstatbot.model.Measurement;
 
