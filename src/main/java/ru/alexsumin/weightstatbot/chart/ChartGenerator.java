@@ -49,7 +49,6 @@ public class ChartGenerator extends Application {
                             new CategoryAxis(), new NumberAxis(minY, maxY, tick));
                     ChartHelperUtil.configureChart(chart);
 
-
                     final XYChart.Series<String, Number> series = new XYChart.Series<>();
                     for (Measurement measurement : list) {
                         series.getData().add(
