@@ -3,8 +3,8 @@ package ru.alexsumin.weightstatbot.util;
 import org.junit.Before;
 import org.junit.Test;
 import ru.alexsumin.weightstatbot.chart.ChartHelperUtil;
-import ru.alexsumin.weightstatbot.model.Account;
-import ru.alexsumin.weightstatbot.model.Measurement;
+import ru.alexsumin.weightstatbot.domain.Account;
+import ru.alexsumin.weightstatbot.domain.Measurement;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package ru.alexsumin.weightstatbot.model;
+package ru.alexsumin.weightstatbot.domain;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -11,35 +11,27 @@ import java.util.List;
 public class Account {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "account_id")
-    private Integer id;
-
     @NotNull
-    @Column(name = "chatId")
-    private Long chatId;
-
+    @Column(name = "account_id")
+    private Long id;
 
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "account")
     private List<Measurement> measurements = new ArrayList<>();
 
-
     public Account() {
     }
 
-    public Account(long chatId) {
-        this.chatId = chatId;
-    }
-
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
+    public Account(long id) {
         this.id = id;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public List<Measurement> getMeasurements() {
         return measurements;
@@ -49,13 +41,6 @@ public class Account {
         this.measurements = measurements;
     }
 
-    public Long getChatId() {
-        return chatId;
-    }
-
-    public void setChatId(Long chatId) {
-        this.chatId = chatId;
-    }
 
     @Override
     public boolean equals(Object o) {

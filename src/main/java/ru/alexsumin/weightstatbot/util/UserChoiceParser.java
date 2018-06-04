@@ -1,7 +1,7 @@
 package ru.alexsumin.weightstatbot.util;
 
 import org.springframework.util.NumberUtils;
-import ru.alexsumin.weightstatbot.model.UserAnswer;
+import ru.alexsumin.weightstatbot.domain.UserAnswer;
 
 import java.math.BigDecimal;
 

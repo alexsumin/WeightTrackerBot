@@ -1,7 +1,7 @@
 package ru.alexsumin.weightstatbot.chart;
 
 import javafx.scene.chart.AreaChart;
-import ru.alexsumin.weightstatbot.model.Measurement;
+import ru.alexsumin.weightstatbot.domain.Measurement;
 
 import java.util.Comparator;
 import java.util.List;

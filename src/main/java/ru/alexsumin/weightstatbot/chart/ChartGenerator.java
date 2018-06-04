@@ -14,7 +14,7 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.apache.commons.io.IOUtils;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
-import ru.alexsumin.weightstatbot.model.Measurement;
+import ru.alexsumin.weightstatbot.domain.Measurement;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

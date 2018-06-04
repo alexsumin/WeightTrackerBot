@@ -1,7 +1,7 @@
 package ru.alexsumin.weightstatbot.service;
 
 import org.springframework.stereotype.Service;
-import ru.alexsumin.weightstatbot.model.Account;
+import ru.alexsumin.weightstatbot.domain.Account;
 import ru.alexsumin.weightstatbot.repository.AccountRepository;
 
 import java.util.Optional;
@@ -16,7 +16,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public boolean isUserExists(Long chatId) {
-        Optional<Account> user = accountRepository.findByChatId(chatId);
+        Optional<Account> user = accountRepository.findById(chatId);
         if (user.isPresent())
             return true;
         else registerUser(chatId);
@@ -30,8 +30,8 @@ public class AccountServiceImpl implements AccountService {
         //logger.info("Register an user with chatId: " + chatId);
     }
 
-    public Account findByChatId(Long chatId) {
-        return accountRepository.findByChatId(chatId).get();
+    public Account findById(Long chatId) {
+        return accountRepository.findById(chatId).get();
     }
 
 

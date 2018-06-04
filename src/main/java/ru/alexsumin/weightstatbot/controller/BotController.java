@@ -13,9 +13,9 @@ import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.alexsumin.weightstatbot.chart.ChartGenerator;
-import ru.alexsumin.weightstatbot.model.Account;
-import ru.alexsumin.weightstatbot.model.Measurement;
-import ru.alexsumin.weightstatbot.model.UserAnswer;
+import ru.alexsumin.weightstatbot.domain.Account;
+import ru.alexsumin.weightstatbot.domain.Measurement;
+import ru.alexsumin.weightstatbot.domain.UserAnswer;
 import ru.alexsumin.weightstatbot.service.AccountService;
 import ru.alexsumin.weightstatbot.service.MeasurementService;
 import ru.alexsumin.weightstatbot.util.DifferenceCalculator;
@@ -155,7 +155,7 @@ public class BotController extends TelegramLongPollingBot {
     }
 
     private void sendChart(Long chatId) {
-        List<Measurement> list = accountService.findByChatId(chatId).getMeasurements();
+        List<Measurement> list = accountService.findById(chatId).getMeasurements();
         try {
             if (list.size() == 0) {
                 noOneValueFound(chatId);
@@ -236,7 +236,7 @@ public class BotController extends TelegramLongPollingBot {
 
     private void addNewValue(Long chatId, String text) {
         //it's safe, first i checked user for existing
-        Account account = accountService.findByChatId(chatId);
+        Account account = accountService.findById(chatId);
 
         text = text.replace(',', '.');
         BigDecimal numeric = new BigDecimal(text);

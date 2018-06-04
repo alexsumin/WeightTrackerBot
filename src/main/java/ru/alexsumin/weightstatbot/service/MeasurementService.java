@@ -1,6 +1,6 @@
 package ru.alexsumin.weightstatbot.service;
 
-import ru.alexsumin.weightstatbot.model.Measurement;
+import ru.alexsumin.weightstatbot.domain.Measurement;
 
 import java.math.BigDecimal;
 import java.util.Optional;

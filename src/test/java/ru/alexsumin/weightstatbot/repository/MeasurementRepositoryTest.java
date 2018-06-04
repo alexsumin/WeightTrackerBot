@@ -6,8 +6,8 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.alexsumin.weightstatbot.model.Account;
-import ru.alexsumin.weightstatbot.model.Measurement;
+import ru.alexsumin.weightstatbot.domain.Account;
+import ru.alexsumin.weightstatbot.domain.Measurement;
 
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -33,8 +33,7 @@ public class MeasurementRepositoryTest {
 
     @Test
     public void findByIdTest() {
-        Account account = new Account();
-        account.setChatId(nonRealTestId);
+        Account account = new Account(nonRealTestId);
         BigDecimal value = BigDecimal.valueOf(100);
 
         Measurement measurement = new Measurement();
@@ -54,8 +53,7 @@ public class MeasurementRepositoryTest {
     @Test
     public void getUsersFirstMeasurementIdTest() {
 
-        Account account = new Account();
-        account.setChatId(nonRealTestId);
+        Account account = new Account(nonRealTestId);
 
         BigDecimal value = BigDecimal.valueOf(110);
 
@@ -90,8 +88,7 @@ public class MeasurementRepositoryTest {
 
     @Test
     public void getUsersLastMeasurementIdTest() {
-        Account account = new Account();
-        account.setChatId(nonRealTestId);
+        Account account = new Account(nonRealTestId);
 
         BigDecimal value = BigDecimal.valueOf(110);
 
@@ -118,7 +115,7 @@ public class MeasurementRepositoryTest {
     @Test(expected = NoSuchElementException.class)
     public void deleteByIdTest() {
         Account account = new Account();
-        account.setChatId(nonRealTestId);
+        account.setId(nonRealTestId);
 
         BigDecimal value = BigDecimal.valueOf(75.55);
         Measurement measurement = new Measurement(value, account);
@@ -137,4 +134,6 @@ public class MeasurementRepositoryTest {
         assertEquals(idToDelete, measurementRepository.findById(idToDelete).get().getId());
     }
 
+
 }
+

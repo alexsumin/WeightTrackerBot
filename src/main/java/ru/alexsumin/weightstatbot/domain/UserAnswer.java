@@ -1,4 +1,4 @@
-package ru.alexsumin.weightstatbot.model;
+package ru.alexsumin.weightstatbot.domain;
 
 public enum UserAnswer {
     START,

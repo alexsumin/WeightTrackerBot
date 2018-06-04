@@ -1,17 +1,15 @@
-package ru.alexsumin.weightstatbot.model;
+package ru.alexsumin.weightstatbot.domain;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.text.SimpleDateFormat;
 
 @Entity
 public class Measurement {
-    private static final SimpleDateFormat format = new SimpleDateFormat("dd:mm:yyyy");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "value_id")
+    @Column(name = "measurement_id")
     private Long id;
 
     private BigDecimal amount;

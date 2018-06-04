@@ -1,7 +1,7 @@
 package ru.alexsumin.weightstatbot.service;
 
 import org.springframework.stereotype.Service;
-import ru.alexsumin.weightstatbot.model.Measurement;
+import ru.alexsumin.weightstatbot.domain.Measurement;
 import ru.alexsumin.weightstatbot.repository.MeasurementRepository;
 
 import java.math.BigDecimal;

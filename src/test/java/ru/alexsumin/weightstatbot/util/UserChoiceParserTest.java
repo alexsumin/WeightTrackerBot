@@ -2,7 +2,7 @@ package ru.alexsumin.weightstatbot.util;
 
 import org.junit.Assert;
 import org.junit.Test;
-import ru.alexsumin.weightstatbot.model.UserAnswer;
+import ru.alexsumin.weightstatbot.domain.UserAnswer;
 
 public class UserChoiceParserTest {
     @Test
