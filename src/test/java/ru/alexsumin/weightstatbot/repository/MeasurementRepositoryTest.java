@@ -5,13 +5,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.alexsumin.weightstatbot.domain.Account;
 import ru.alexsumin.weightstatbot.domain.Measurement;
 
 import java.math.BigDecimal;
 import java.sql.Date;
-import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -112,26 +112,26 @@ public class MeasurementRepositoryTest {
     }
 
 
-    @Test(expected = NoSuchElementException.class)
+    @Test(expected = EmptyResultDataAccessException.class)
     public void deleteByIdTest() {
         Account account = new Account();
         account.setId(nonRealTestId);
 
-        BigDecimal value = BigDecimal.valueOf(75.55);
-        Measurement measurement = new Measurement(value, account);
+        Measurement measurement = new Measurement(BigDecimal.valueOf(75.55), account);
+
         accountRepository.save(account);
         measurementRepository.save(measurement);
 
-
         Long idToDelete = 5L;
-        BigDecimal valueSecond = BigDecimal.valueOf(120);
-        Measurement measurementSecond = new Measurement(valueSecond, account);
+        Measurement measurementSecond = new Measurement(BigDecimal.valueOf(120), account);
         measurementSecond.setId(idToDelete);
         measurementRepository.save(measurementSecond);
 
 
+
         measurementRepository.deleteById(idToDelete);
-        assertEquals(idToDelete, measurementRepository.findById(idToDelete).get().getId());
+        Measurement afterDelete = measurementRepository.findById(idToDelete).get();
+        assertEquals(idToDelete, afterDelete.getId());
     }
 
 
