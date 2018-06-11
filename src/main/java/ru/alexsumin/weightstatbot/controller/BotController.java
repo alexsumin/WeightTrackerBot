@@ -6,63 +6,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.api.methods.send.SendMessage;
-import org.telegram.telegrambots.api.methods.send.SendPhoto;
 import org.telegram.telegrambots.api.objects.Message;
 import org.telegram.telegrambots.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 import ru.alexsumin.weightstatbot.chart.ChartGenerator;
-import ru.alexsumin.weightstatbot.domain.Account;
-import ru.alexsumin.weightstatbot.domain.Measurement;
-import ru.alexsumin.weightstatbot.domain.UserAnswer;
-import ru.alexsumin.weightstatbot.service.AccountService;
-import ru.alexsumin.weightstatbot.service.MeasurementService;
-import ru.alexsumin.weightstatbot.util.DifferenceCalculator;
-import ru.alexsumin.weightstatbot.util.UserChoiceParser;
+import ru.alexsumin.weightstatbot.commands.Command;
+import ru.alexsumin.weightstatbot.commands.CommandResponse;
+import ru.alexsumin.weightstatbot.factory.CommandFactory;
 
 import javax.annotation.PostConstruct;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 public class BotController extends TelegramLongPollingBot {
 
-    private static final String HELLO = "What can this bot do? " +
-            "This simple bot allows you to track " +
-            "your weight change, draw a chart with of your results. " +
-            "Just write /help to see a hint. " +
-            "Other functionality will be soon! Have a nice day :)";
-
-    private static final String HELP = "Now I'm going to tell you how to use me. " +
-            "I keep your statistics of weight changes. " +
-            "To add a new value, simply send a number. " +
-            "To get a chart, send me /chart. " +
-            "To get statistics, send me /stat." +
-            "To delete a last value, send me /delete.";
-
-    private static final String DELETED = "Successfully deleted last measurement!";
-
-    private static final String NO_VALUES = "Ooups! No one measurement found. Just add a new to start!";
-
-    private static final String UNKNOWN = "Ooups! I'm sorry, But I'm not smart guy and I don't understand you. " +
-            "I can recognize only a few commands. Send /help to see a them.";
-
-    private static final SimpleDateFormat formatter = new SimpleDateFormat("dd MMM");
-
-    private static final int TEN_DAYS = 10;
-    private static final int THIRTY_DAYS = 30;
-
     private static final Logger logger = LoggerFactory.getLogger(BotController.class);
 
     private final ThreadPoolTaskExecutor taskExecutor;
-    private final AccountService accountService;
-    private final MeasurementService measurementService;
+    private final CommandFactory commandFactory;
 
     @Value("${bot.token}")
     private String token;
@@ -70,10 +32,9 @@ public class BotController extends TelegramLongPollingBot {
     private String username;
 
     @Autowired
-    public BotController(AccountService accountService, MeasurementService measurementService, ThreadPoolTaskExecutor taskExecutor) {
-        this.accountService = accountService;
-        this.measurementService = measurementService;
+    public BotController(ThreadPoolTaskExecutor taskExecutor, CommandFactory commandFactory) {
         this.taskExecutor = taskExecutor;
+        this.commandFactory = commandFactory;
     }
 
     @PostConstruct
@@ -87,146 +48,42 @@ public class BotController extends TelegramLongPollingBot {
         if (update.hasMessage()) {
 
             Message message = update.getMessage();
-            Long chatId = message.getChatId();
+            Command command = commandFactory.getCommand(message);
 
-            if (!accountService.isUserExists(chatId))
-                sendHelloMessage(chatId);
-            else {
-                String text = message.getText();
-                logger.info("Received text: \"" + text + "\" from user.chatId: " + chatId);
-                UserAnswer answer = new UserChoiceParser(text).getUserAnswer();
-
-                switch (answer) {
-                    case GET_HELP:
-                        sendHelpMessage(chatId);
-                        break;
-                    case ADD_VALUE:
-                        addNewValue(chatId, text);
-                        break;
-                    case GET_STAT:
-                        sendStat(chatId);
-                        break;
-                    case GET_CHART:
-                        sendChart(chatId);
-                        break;
-                    case DELETE:
-                        deleteLastValue(chatId);
-                        break;
-                    case UNKNOWN:
-                        sendUnsupportedMessage(chatId);
-                        break;
+            CompletableFuture.supplyAsync(() -> {
+                try {
+                    return command.call();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
                 }
-            }
+            }, taskExecutor)
+                    .thenAcceptAsync(this::sendResponse, taskExecutor)
+                    .exceptionally(throwable -> {
+                        logger.error(throwable.getMessage());
+                        return null;
+                    });
+
+
         }
     }
 
-    private void sendMessage(Long chatId, String text) {
-        SendMessage response = new SendMessage();
-        response.setChatId(chatId);
-        response.setText(text);
+    private synchronized void sendResponse(CommandResponse response) {
         try {
-            execute(response);
+            if (response.isPhoto())
+                sendPhoto(response.getSendPhoto());
+            else execute(response.getSendMessage());
         } catch (TelegramApiException e) {
-            logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
+            logger.error("Couldn't send message to user " + e.getMessage());
         }
 
     }
 
-    private void sendUnsupportedMessage(Long chatId) {
-        sendMessage(chatId, UNKNOWN);
-    }
-
-    private void deleteLastValue(Long chatId) {
-        if (!measurementService.deleteLastMeasurement(chatId)) {
-            noOneValueFound(chatId);
-            return;
-        }
-        sendMessage(chatId, DELETED);
-    }
-
-    private void noOneValueFound(Long chatId) {
-        sendMessage(chatId, NO_VALUES);
-    }
-
-    private void sendChart(Long chatId) {
-        List<Measurement> list = accountService.findById(chatId).getMeasurements();
-        try {
-            if (list.size() == 0) {
-                noOneValueFound(chatId);
-                return;
-            }
-            byte[] file = ChartGenerator.generateChart(list);
-            InputStream bis = new ByteArrayInputStream(file);
-
-            SendPhoto photoMessage = new SendPhoto().setChatId(chatId);
-            photoMessage.setNewPhoto("stat.png", bis);
-            sendPhoto(photoMessage);
-
-        } catch (ChartGenerator.ChartGenerationException c) {
-            logger.error("Couldn't generate a chart and send to user.chatId " + chatId + ". " + c.getMessage());
-        } catch (TelegramApiException e) {
-            logger.error("Couldn't send message to user.chatId " + chatId + ". " + e.getMessage());
-        }
-    }
-
-    private void sendHelpMessage(Long chatId) {
-        sendMessage(chatId, HELP);
-    }
-
-    private void sendHelloMessage(Long chatId) {
-        sendMessage(chatId, HELLO);
-    }
-
-    private void sendStat(Long chatId) {
-
-        Optional<BigDecimal> first = measurementService.getUsersFirstMeasurementValue(chatId);
-
-        if (!first.isPresent()) {
-            noOneValueFound(chatId);
-        } else {
-            Optional<BigDecimal> tenDaysAgo = measurementService.getFirstMeasurementValueInPeriod(chatId, TEN_DAYS);
-            Optional<BigDecimal> thirtyDaysAgo = measurementService.getFirstMeasurementValueInPeriod(chatId, THIRTY_DAYS);
-
-            BigDecimal last = measurementService.getUsersLastMeasurementValue(chatId).get();
-
-            String messageText = "Your current weight: " + last + " kg.\n" +
-                    "Your progress in" +
-                    "\n10 days: " + DifferenceCalculator.getDifferenceWithSignForStat(tenDaysAgo, last) +
-                    "\n30 days: " + DifferenceCalculator.getDifferenceWithSignForStat(thirtyDaysAgo, last) +
-                    "\nTotal: " + DifferenceCalculator.getDifferenceWithSignForStat(first, last)
-                    + "\nTo see chart just send me /chart";
-
-            sendMessage(chatId, messageText);
-        }
-    }
-
-    private void addNewValue(Long chatId, String text) {
-        //it's safe, first i checked user for existing
-        Account account = accountService.findById(chatId);
-
-        text = text.replace(',', '.');
-        BigDecimal numeric = new BigDecimal(text);
-
-        Optional<BigDecimal> measurementLast = measurementService.getUsersLastMeasurementValue(chatId);
-
-        Measurement measurementNew = new Measurement(numeric, account);
-        measurementService.addNewValue(measurementNew);
-
-        String textMessage = "Well, The new measurement " + text + " kg was added on " +
-                getCurrentDate() + "." +
-                DifferenceCalculator.getDifferenceWithSign(measurementLast, numeric);
-        sendMessage(chatId, textMessage);
-    }
-
-
-    private String getCurrentDate() {
-        return formatter.format(new Date(System.currentTimeMillis()));
-    }
 
     @Override
     public String getBotUsername() {
         return username;
     }
+
 
     @Override
     public String getBotToken() {

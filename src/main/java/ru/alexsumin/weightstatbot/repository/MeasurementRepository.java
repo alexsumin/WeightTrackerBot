@@ -1,8 +1,10 @@
 package ru.alexsumin.weightstatbot.repository;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import ru.alexsumin.weightstatbot.domain.Measurement;
 
 import java.math.BigDecimal;
@@ -29,5 +31,9 @@ public interface MeasurementRepository extends CrudRepository<Measurement, Long>
             "WHERE a.account_id=:id AND m.DATE_OF_MEASUREMENT > DATE_ADD(current_date, INTERVAL -:period DAY) LIMIT 1; ", nativeQuery = true)
     Optional<BigDecimal> getFirstMeasurementValueInPeriod(@Param("id") Long chatId, @Param("period") int period);
 
+    @Transactional
+    @Modifying
+    @Query("DELETE FROM Measurement m WHERE m.id =:id")
+    void deleteById(@Param("id") Long id);
 
 }

@@ -58,7 +58,6 @@ public class MeasurementServiceImpl implements MeasurementService {
         Long lastMeasurement = measurement.get().longValue();
         measurementRepository.deleteById(lastMeasurement);
         return true;
-
     }
 
     @Override

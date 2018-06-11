@@ -5,13 +5,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.context.junit4.SpringRunner;
 import ru.alexsumin.weightstatbot.domain.Account;
 import ru.alexsumin.weightstatbot.domain.Measurement;
 
 import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.NoSuchElementException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -112,7 +112,7 @@ public class MeasurementRepositoryTest {
     }
 
 
-    @Test(expected = EmptyResultDataAccessException.class)
+    @Test(expected = NoSuchElementException.class)
     public void deleteByIdTest() {
         Account account = new Account();
         account.setId(nonRealTestId);
