@@ -5,11 +5,11 @@ import org.telegram.telegrambots.api.objects.Message;
 
 public class HelpCommand extends Command {
 
-    private static final String HELP = "Let me explain to you how I work. " +
-            "I keep your weight statistics. " +
-            "To add a new measurement, simply send me this value. " +
-            "To view a chart, send me /chart. " +
-            "To get statistics, send me /stat." +
+    private static final String HELP = "Let me explain to you how I work.\n" +
+            "I keep your weight statistics.\n" +
+            "To add a new measurement, simply send me this value.\n" +
+            "To view a chart, send me /chart.\n" +
+            "To get statistics, send me /stat.\n" +
             "To delete the last data value, send me /delete.";
 
     private final Message message;

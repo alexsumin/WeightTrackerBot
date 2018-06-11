@@ -16,8 +16,8 @@ public class DifferenceCalculator {
         BigDecimal result = secondValue.subtract(firstValue);
 
         if (result.doubleValue() < 0)
-            return " Last change: " + result + " kg.";
-        else return " Last change: +" + result + " kg.";
+            return "Last change: " + result + " kg.";
+        else return "Last change: +" + result + " kg.";
     }
 
     public static String getDifferenceWithSignForStat(Optional<BigDecimal> first, BigDecimal second) {

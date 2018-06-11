@@ -51,11 +51,12 @@ public class AddNewValueCommand extends Command {
         Measurement measurementNew = new Measurement(numeric, account);
         measurementService.addNewValue(measurementNew);
 
-        String newMessage = "Well, The new measurement " + text + " kg was added on " +
-                getCurrentDate() + "." +
-                DifferenceCalculator.getDifferenceWithSign(measurementLast, numeric);
+        StringBuilder newMessage = new StringBuilder("Well, The new measurement ")
+                .append(text).append(" kg was added on ").append(
+                        getCurrentDate()).append(".\n").append(
+                        DifferenceCalculator.getDifferenceWithSign(measurementLast, numeric));
 
-        responseMessage.setText(newMessage);
+        responseMessage.setText(newMessage.toString());
         return new CommandResponse(responseMessage);
     }
 }
