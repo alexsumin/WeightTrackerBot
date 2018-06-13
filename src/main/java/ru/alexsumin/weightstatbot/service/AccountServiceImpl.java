@@ -1,11 +1,12 @@
 package ru.alexsumin.weightstatbot.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.alexsumin.weightstatbot.domain.Account;
 import ru.alexsumin.weightstatbot.repository.AccountRepository;
 
 import java.util.Optional;
-
+@Slf4j
 @Service
 public class AccountServiceImpl implements AccountService {
 
@@ -15,17 +16,10 @@ public class AccountServiceImpl implements AccountService {
         this.accountRepository = accountRepository;
     }
 
-    public boolean isUserExists(Long chatId) {
-        Optional<Account> user = accountRepository.findById(chatId);
-        if (user.isPresent())
-            return true;
-        else registerUser(chatId);
-        return false;
-    }
-
     private Account registerUser(Long chatId) {
         Account newUser = new Account(chatId);
         accountRepository.save(newUser);
+        log.info("Register user " + chatId);
         return newUser;
     }
 

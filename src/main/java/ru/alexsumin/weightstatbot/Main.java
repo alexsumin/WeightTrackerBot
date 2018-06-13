@@ -22,7 +22,6 @@ public class Main {
         executor.setThreadNamePrefix("task_executor_thread_");
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(5);
-        executor.setDaemon(true);
 
         return executor;
     }

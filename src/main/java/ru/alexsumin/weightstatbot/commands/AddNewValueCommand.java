@@ -46,7 +46,7 @@ public class AddNewValueCommand extends Command {
         BigDecimal numeric = new BigDecimal(text);
 
         Optional<BigDecimal> measurementLast =
-                measurementService.getUsersLastMeasurementValue(message.getChatId());
+                measurementService.getUserLastMeasurementValue(message.getChatId());
 
         Measurement measurementNew = new Measurement(numeric, account);
         measurementService.addNewValue(measurementNew);

@@ -27,7 +27,7 @@ public class StatCommand extends Command {
 
         SendMessage responseMessage = new SendMessage();
         responseMessage.setChatId(chatId);
-        Optional<BigDecimal> first = measurementService.getUsersFirstMeasurementValue(chatId);
+        Optional<BigDecimal> first = measurementService.getUserFirstMeasurementValue(chatId);
 
         if (!first.isPresent()) {
             responseMessage.setText("Oops! No measurements were found. Just add the new one to start!");
@@ -37,7 +37,7 @@ public class StatCommand extends Command {
         Optional<BigDecimal> tenDaysAgo = measurementService.getFirstMeasurementValueInPeriod(chatId, TEN_DAYS);
         Optional<BigDecimal> thirtyDaysAgo = measurementService.getFirstMeasurementValueInPeriod(chatId, THIRTY_DAYS);
 
-        BigDecimal last = measurementService.getUsersLastMeasurementValue(chatId).get();
+        BigDecimal last = measurementService.getUserLastMeasurementValue(chatId).get();
 
         StringBuilder messageText = new StringBuilder("Your current weight: ").append(last)
                 .append(" kg.\n").append("Your progress within a period of").append("\n10 days: ")

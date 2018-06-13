@@ -28,7 +28,7 @@ public class UserChoiceParser {
             default: {
                 try {
                     text = text.replace(',', '.');
-                    BigDecimal value = NumberUtils.parseNumber(text, BigDecimal.class);
+                    NumberUtils.parseNumber(text, BigDecimal.class);
                     return UserAnswer.ADD_VALUE;
                 } catch (NumberFormatException e) {
                     return UserAnswer.UNKNOWN;

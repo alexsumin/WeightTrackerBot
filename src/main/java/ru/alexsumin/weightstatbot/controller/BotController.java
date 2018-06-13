@@ -1,7 +1,6 @@
 package ru.alexsumin.weightstatbot.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -18,10 +17,10 @@ import ru.alexsumin.weightstatbot.factory.CommandFactory;
 import javax.annotation.PostConstruct;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Component
 public class BotController extends TelegramLongPollingBot {
 
-    private static final Logger logger = LoggerFactory.getLogger(BotController.class);
 
     private final ThreadPoolTaskExecutor taskExecutor;
     private final CommandFactory commandFactory;
@@ -46,8 +45,9 @@ public class BotController extends TelegramLongPollingBot {
     @Override
     public void onUpdateReceived(Update update) {
         if (update.hasMessage()) {
-
             Message message = update.getMessage();
+            log.info("Received message: " + message.getText() + " from user: " + message.getChatId());
+
             Command command = commandFactory.getCommand(message);
 
             CompletableFuture.supplyAsync(() -> {
@@ -59,7 +59,7 @@ public class BotController extends TelegramLongPollingBot {
             }, taskExecutor)
                     .thenAcceptAsync(this::sendResponse, taskExecutor)
                     .exceptionally(throwable -> {
-                        logger.error(throwable.getMessage());
+                        log.error(throwable.getMessage());
                         return null;
                     });
 
@@ -69,11 +69,17 @@ public class BotController extends TelegramLongPollingBot {
 
     private synchronized void sendResponse(CommandResponse response) {
         try {
-            if (response.isPhoto())
+            if (response.isPhoto()){
                 sendPhoto(response.getSendPhoto());
-            else execute(response.getSendMessage());
+                log.info("Sent chart to user: " + response.getSendPhoto().getChatId());
+            }
+            else {
+                execute(response.getSendMessage());
+                log.info("Sent message: " + response.getSendMessage().getText()
+                        + " to user: " + response.getSendMessage().getChatId());
+            }
         } catch (TelegramApiException e) {
-            logger.error("Couldn't send message to user " + e.getMessage());
+            log.error("Couldn't send message: " + e.getMessage());
         }
 
     }

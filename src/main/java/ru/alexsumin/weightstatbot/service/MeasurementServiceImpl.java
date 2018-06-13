@@ -23,12 +23,7 @@ public class MeasurementServiceImpl implements MeasurementService {
     }
 
     @Override
-    public void deleteById(Long chatId) {
-        measurementRepository.deleteById(chatId);
-    }
-
-    @Override
-    public Optional<BigDecimal> getUsersFirstMeasurementValue(Long chatId) {
+    public Optional<BigDecimal> getUserFirstMeasurementValue(Long chatId) {
         Optional<BigInteger> firstMeasurementId = measurementRepository.getUsersFirstMeasurementId(chatId);
         if (firstMeasurementId.isPresent()) {
             return Optional.of(measurementRepository.findById(firstMeasurementId.get().longValue()).get().getAmount());
@@ -37,15 +32,8 @@ public class MeasurementServiceImpl implements MeasurementService {
     }
 
     @Override
-    public Optional<Measurement> findById(Long id) {
-        return measurementRepository.findById(id);
-
-    }
-
-    @Override
     public Optional<BigDecimal> getFirstMeasurementValueInPeriod(Long chatId, int period) {
         return measurementRepository.getFirstMeasurementValueInPeriod(chatId, period);
-
     }
 
     @Override
@@ -61,7 +49,7 @@ public class MeasurementServiceImpl implements MeasurementService {
     }
 
     @Override
-    public Optional<BigDecimal> getUsersLastMeasurementValue(Long chatId) {
+    public Optional<BigDecimal> getUserLastMeasurementValue(Long chatId) {
         Optional<BigInteger> lastMeasurementId;
         lastMeasurementId = measurementRepository.getUsersLastMeasurementId(chatId);
 

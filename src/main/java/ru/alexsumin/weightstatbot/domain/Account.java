@@ -1,11 +1,17 @@
 package ru.alexsumin.weightstatbot.domain;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Data
+@NoArgsConstructor
+@ToString(exclude = "measurements")
 @Entity
 @Table(name = "account")
 public class Account {
@@ -18,29 +24,9 @@ public class Account {
     @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "account")
     private List<Measurement> measurements = new ArrayList<>();
 
-    public Account() {
+    public Account(long chatId) {
+        this.id = chatId;
     }
-
-    public Account(long id) {
-        this.id = id;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public List<Measurement> getMeasurements() {
-        return measurements;
-    }
-
-    public void setMeasurements(List<Measurement> measurements) {
-        this.measurements = measurements;
-    }
-
 
     @Override
     public boolean equals(Object o) {
@@ -57,12 +43,4 @@ public class Account {
         return id != null ? id.hashCode() : 0;
     }
 
-    @Override
-    public String toString() {
-        return "Account{" +
-                "id=" + id +
-                +'\'' +
-                ", measurements=" + measurements +
-                '}';
-    }
 }

@@ -9,13 +9,9 @@ public interface MeasurementService {
 
     void addNewValue(Measurement measurement);
 
-    Optional<BigDecimal> getUsersLastMeasurementValue(Long chatId);
+    Optional<BigDecimal> getUserLastMeasurementValue(Long chatId);
 
-    void deleteById(Long chatId);
-
-    Optional<BigDecimal> getUsersFirstMeasurementValue(Long chatId);
-
-    Optional<Measurement> findById(Long id);
+    Optional<BigDecimal> getUserFirstMeasurementValue(Long chatId);
 
     Optional<BigDecimal> getFirstMeasurementValueInPeriod(Long chatId, int period);
 
