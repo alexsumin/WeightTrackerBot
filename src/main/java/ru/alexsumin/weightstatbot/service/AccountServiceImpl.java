@@ -21,17 +21,18 @@ public class AccountServiceImpl implements AccountService {
             return true;
         else registerUser(chatId);
         return false;
-
     }
 
-    private void registerUser(Long chatId) {
+    private Account registerUser(Long chatId) {
         Account newUser = new Account(chatId);
         accountRepository.save(newUser);
-        //logger.info("Register an user with chatId: " + chatId);
+        return newUser;
     }
 
     public Account findById(Long chatId) {
-        return accountRepository.findById(chatId).get();
+        Optional<Account> account = accountRepository.findById(chatId);
+        return account.orElseGet(() -> registerUser(chatId));
+
     }
 
 
