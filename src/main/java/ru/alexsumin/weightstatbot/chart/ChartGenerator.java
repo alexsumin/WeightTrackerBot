@@ -35,47 +35,44 @@ public class ChartGenerator extends Application {
     }
 
     public static synchronized byte[] generateChart(List<Measurement> list) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                ByteArrayOutputStream baos = null;
-                try {
+        Platform.runLater(() -> {
+            ByteArrayOutputStream baos = null;
+            try {
 
-                    double minY = ChartHelperUtil.findMin(list);
-                    double maxY = ChartHelperUtil.findMax(list);
-                    double tick = ChartHelperUtil.calculateTick(minY, maxY);
+                double minY = ChartHelperUtil.findMin(list);
+                double maxY = ChartHelperUtil.findMax(list);
+                double tick = ChartHelperUtil.calculateTick(minY, maxY);
 
-                    CurvedFittedAreaChart chart = new CurvedFittedAreaChart(
-                            new CategoryAxis(), new NumberAxis(minY, maxY, tick));
-                    ChartHelperUtil.configureChart(chart);
+                CurvedFittedAreaChart chart = new CurvedFittedAreaChart(
+                        new CategoryAxis(), new NumberAxis(minY, maxY, tick));
+                ChartHelperUtil.configureChart(chart);
 
-                    final XYChart.Series<String, Number> series = new XYChart.Series<>();
-                    for (Measurement measurement : list) {
-                        series.getData().add(
-                                new XYChart.Data<>(formatter.format(measurement.getDateOfMeasurement()),
-                                        measurement.getAmount()));
-                    }
-
-                    chart.getData().add(series);
-                    chart.setTitle("Your weight stat on "
-                            + formatter.format(new Date(System.currentTimeMillis())));
-
-                    Scene snapshotScene = new Scene(chart);
-                    snapshotScene.getStylesheets().add(getClass().getClassLoader().getResource("./charts/CurveFittedChart.css").toExternalForm());
-
-                    final SnapshotParameters snapshotParameters = new SnapshotParameters();
-                    snapshotParameters.setFill(Color.TRANSPARENT);
-                    WritableImage image = chart.snapshot(snapshotParameters, null);
-                    BufferedImage bImage = SwingFXUtils.fromFXImage(image, null);
-                    baos = new ByteArrayOutputStream();
-                    ImageIO.write(bImage, "png", baos);
-                    result = baos.toByteArray();
-
-                } catch (Exception e) {
-                    throw new ChartGenerationException(e);
-                } finally {
-                    IOUtils.closeQuietly(baos);
+                final XYChart.Series<String, Number> series = new XYChart.Series<>();
+                for (Measurement measurement : list) {
+                    series.getData().add(
+                            new XYChart.Data<>(formatter.format(measurement.getDateOfMeasurement()),
+                                    measurement.getAmount()));
                 }
+
+                chart.getData().add(series);
+                chart.setTitle("Your weight stat on "
+                        + formatter.format(new Date(System.currentTimeMillis())));
+
+                Scene snapshotScene = new Scene(chart);
+                snapshotScene.getStylesheets().add("/charts/CurveFittedChart.css");
+
+                final SnapshotParameters snapshotParameters = new SnapshotParameters();
+                snapshotParameters.setFill(Color.TRANSPARENT);
+                WritableImage image = chart.snapshot(snapshotParameters, null);
+                BufferedImage bImage = SwingFXUtils.fromFXImage(image, null);
+                baos = new ByteArrayOutputStream();
+                ImageIO.write(bImage, "png", baos);
+                result = baos.toByteArray();
+
+            } catch (Exception e) {
+                throw new ChartGenerationException(e);
+            } finally {
+                IOUtils.closeQuietly(baos);
             }
         });
         while (result == null) {
