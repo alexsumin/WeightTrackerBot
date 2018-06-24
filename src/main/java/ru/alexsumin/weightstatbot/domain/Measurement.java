@@ -10,9 +10,9 @@ import java.math.BigDecimal;
 import java.sql.Date;
 
 @Data
+@Entity
 @NoArgsConstructor
 @ToString(exclude = "account")
-@Entity
 @EqualsAndHashCode(exclude = "account")
 public class Measurement {
 

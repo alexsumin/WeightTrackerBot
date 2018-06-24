@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Entity
 @NoArgsConstructor
 @ToString(exclude = "measurements")
-@Entity
 @Table(name = "account")
 public class Account {
 
