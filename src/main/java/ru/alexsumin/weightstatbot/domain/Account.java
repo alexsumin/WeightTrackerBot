@@ -6,7 +6,6 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -21,8 +20,8 @@ public class Account {
     @Column(name = "account_id")
     private Long id;
 
-    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.EAGER, mappedBy = "account")
-    private List<Measurement> measurements = new ArrayList<>();
+    @OneToMany(cascade = {CascadeType.ALL}, fetch = FetchType.LAZY, mappedBy = "account")
+    private List<Measurement> measurements;
 
     public Account(long chatId) {
         this.id = chatId;

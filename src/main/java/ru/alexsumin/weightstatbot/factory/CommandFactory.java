@@ -33,7 +33,7 @@ public class CommandFactory {
             case GET_STAT:
                 return new StatCommand(message, measurementService);
             case GET_CHART:
-                return new ChartCommand(message, accountService);
+                return new ChartCommand(message, measurementService);
             case DELETE:
                 return new DeleteCommand(message, measurementService);
             default:

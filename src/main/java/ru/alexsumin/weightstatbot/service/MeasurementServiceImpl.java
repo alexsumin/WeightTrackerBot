@@ -6,6 +6,7 @@ import ru.alexsumin.weightstatbot.repository.MeasurementRepository;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -20,6 +21,11 @@ public class MeasurementServiceImpl implements MeasurementService {
     @Override
     public void addNewValue(Measurement measurement) {
         measurementRepository.save(measurement);
+    }
+
+    @Override
+    public List<Measurement> getUserAllMeasurements(Long chatId) {
+        return measurementRepository.getAllUsersMeasurement(chatId);
     }
 
     @Override

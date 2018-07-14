@@ -9,10 +9,15 @@ import ru.alexsumin.weightstatbot.domain.Measurement;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.util.List;
 import java.util.Optional;
 
 
 public interface MeasurementRepository extends CrudRepository<Measurement, Long> {
+
+    @Transactional
+    @Query(value = "SELECT m FROM Measurement m INNER JOIN m.account a WHERE a.id =:id")
+    List<Measurement> getAllUsersMeasurement(@Param("id") Long chatId);
 
     @Query(value = "SELECT m.MEASUREMENT_ID  FROM measurement as m " +
             "LEFT OUTER JOIN account as a ON  m.ACCOUNT_ACCOUNT_ID = a.account_id " +
