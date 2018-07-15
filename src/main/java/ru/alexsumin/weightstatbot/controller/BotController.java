@@ -69,11 +69,10 @@ public class BotController extends TelegramLongPollingBot {
 
     private synchronized void sendResponse(CommandResponse response) {
         try {
-            if (response.isPhoto()){
+            if (response.isPhoto()) {
                 sendPhoto(response.getSendPhoto());
                 log.info("Sent chart to user: " + response.getSendPhoto().getChatId());
-            }
-            else {
+            } else {
                 execute(response.getSendMessage());
                 log.info("Sent message: " + response.getSendMessage().getText()
                         + " to user: " + response.getSendMessage().getChatId());

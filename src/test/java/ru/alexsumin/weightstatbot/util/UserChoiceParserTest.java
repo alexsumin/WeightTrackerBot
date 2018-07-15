@@ -32,5 +32,8 @@ public class UserChoiceParserTest {
         UserAnswer answerAddValueAnother = new UserChoiceParser("99,99").getUserAnswer();
         Assert.assertEquals(UserAnswer.ADD_VALUE, answerAddValueAnother);
 
+        UserAnswer answerAddNegativeValue = new UserChoiceParser("-99,99").getUserAnswer();
+        Assert.assertEquals(UserAnswer.NEGATIVE_VALUE, answerAddNegativeValue);
+
     }
 }

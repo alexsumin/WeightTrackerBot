@@ -7,5 +7,6 @@ public enum UserAnswer {
     GET_CHART,
     GET_STAT,
     DELETE,
-    UNKNOWN
+    UNKNOWN,
+    NEGATIVE_VALUE
 }

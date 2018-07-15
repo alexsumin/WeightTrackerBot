@@ -28,15 +28,20 @@ public class UserChoiceParser {
             default: {
                 try {
                     text = text.replace(',', '.');
-                    NumberUtils.parseNumber(text, BigDecimal.class);
-                    return UserAnswer.ADD_VALUE;
+                    BigDecimal value = NumberUtils.parseNumber(text, BigDecimal.class);
+                    if (isGreaterThanZero(value))
+                        return UserAnswer.ADD_VALUE;
+                    else return UserAnswer.NEGATIVE_VALUE;
                 } catch (NumberFormatException e) {
                     return UserAnswer.UNKNOWN;
                 }
             }
-
         }
-
     }
+
+    public boolean isGreaterThanZero(BigDecimal value) {
+        return (value.signum() > 0);
+    }
+
 
 }

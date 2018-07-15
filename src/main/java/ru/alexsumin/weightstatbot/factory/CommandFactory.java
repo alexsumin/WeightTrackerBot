@@ -20,7 +20,7 @@ public class CommandFactory {
     }
 
     public Command getCommand(Message message) {
-        String text = message.getText().toLowerCase();
+        String text = message.getText();
         UserAnswer answer = new UserChoiceParser(text).getUserAnswer();
 
         switch (answer) {
@@ -36,6 +36,8 @@ public class CommandFactory {
                 return new ChartCommand(message, measurementService);
             case DELETE:
                 return new DeleteCommand(message, measurementService);
+            case NEGATIVE_VALUE:
+                return new NegativeValueCommand(message);
             default:
                 return new UnknownCommand(message);
 
